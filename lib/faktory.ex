@@ -11,6 +11,9 @@ defmodule Faktory do
 
   @app_name Mix.Project.config[:app]
 
+  @doc false
+  def app_name, do: @app_name
+
   alias Faktory.{Logger, Protocol, Utils, Configuration}
 
   @doc false
