@@ -77,4 +77,13 @@ defmodule Faktory.Utils do
   def parse_config_value({:system, env_var}), do: System.get_env(env_var)
 
   def parse_config_value(value), do: value
+
+  def hash_password(iterations, password, salt) do
+    1..iterations
+    |> Enum.reduce(password <> salt, fn(x, acc) ->
+      :crypto.hash(:sha256, acc)
+    end)
+    |> Base.encode16()
+    |> String.downcase()
+  end
 end
