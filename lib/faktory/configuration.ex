@@ -222,7 +222,7 @@ defmodule Faktory.Configuration do
   end
 
   defp get_env(key) do
-    Application.get_env(:faktory_worker_ex, key)
+    Application.get_env(Faktory.app_name(), key)
     |> Utils.parse_config_value
   end
 
