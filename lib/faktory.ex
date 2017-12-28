@@ -9,6 +9,7 @@ defmodule Faktory do
   # A connection to the Faktory server.
   @type conn :: pid
 
+  # Retain this at compile time since Mix.* will not be available in release builds (e.g., exrm)
   @app_name Mix.Project.config[:app]
 
   @doc false
