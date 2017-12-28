@@ -109,21 +109,11 @@ defmodule Faktory.Connection do
     {:ok, <<"+HI", rest::binary>>} = :gen_tcp.recv(socket, 0)
 
     server_config = Poison.decode!(rest)
-    salt = server_config["s"]
     server_version = to_int(server_config["v"])
 
     if server_version > 2 do
       Logger.warn("Warning: Faktory server protocol #{server_version} in use, but this worker doesn't speak that version")
     end
-
-    password_opts =
-      if salt = server_config["s"] do
-        unless password, do: raise "This server requires a password, but a password hasn't been configured"
-        iterations = server_config["i"]
-        %{pwdhash: Faktory.Utils.hash_password(iterations, password, salt)}
-      else
-        %{}
-      end
 
     payload = %{
       wid: wid,
@@ -132,12 +122,20 @@ defmodule Faktory.Connection do
       labels: ["elixir"],
       v: 2,
     }
-    |> Map.merge(password_opts)
+    |> Map.merge(password_opts(password, server_config))
     |> Poison.encode!
 
     :ok = :gen_tcp.send(socket, "HELLO #{payload}\r\n")
     {:ok, "+OK\r\n"} = :gen_tcp.recv(socket, 0)
   end
+
+  defp password_opts(nil, %{"s" => _salt}), do: raise "This server requires a password, but a password hasn't been configured"
+
+  defp password_opts(password, %{"s" => salt, "i" => iterations}) do
+    %{pwdhash: Faktory.Utils.hash_password(iterations, password, salt)}
+  end
+
+  defp password_opts(_password, _server_config), do: %{}
 
   # If asking for a line, then go into line mode and get whole line.
   defp setup_size(socket, :line) do
