@@ -55,7 +55,7 @@ defmodule Faktory.Worker do
     {:noreply, next(state)}
   end
 
-  def handle_info({:EXIT, pid, :normal}, %{worker_pid: worker_pid} = state) do
+  def handle_info({:EXIT, _pid, :normal}, %{worker_pid: _worker_pid} = state) do
     {:noreply, state}
   end
 
